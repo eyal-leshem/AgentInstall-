@@ -13,6 +13,13 @@ public class InstallConf {
 	private String  		instName; 
 	private String  		instPassword; 
 	private String			serverRegAgentPath; 
+	
+	
+	public String getTrustStorePath() {
+		 return this.getAgentSerivcePath()+ this.getSlesh()+"keystore"+this.getSlesh()+"my.ts";
+	}
+
+
 	public String getServerRegAgentPath() {
 		return serverRegAgentPath;
 	}
@@ -41,10 +48,11 @@ public class InstallConf {
 			this.setAgentName(json.getString("agentName"));
 			this.setAgentSerivcePath(json.getString("agentServicePath")); 
 			this.setServerCaPath(json.getString("serverCaPath")); 
-			this.setInstName("instName"); 
+			this.setInstName(json.getString("instName")); 
 			this.setInstPassword(json.getString("instPassword")); 
 			this.setServerRegAgentPath(json.getString("serverRegAgentPath"));
 			this.setServerChekTrustConectionPath(json.getString("serverChekTrustConectionPath"));
+			
 			
 			
 			

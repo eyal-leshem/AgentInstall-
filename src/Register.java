@@ -85,7 +85,9 @@ public class Register{
     	  nvps.add(new BasicNameValuePair("csr", newCsr));
           nvps.add(new BasicNameValuePair("name", conf.getAgentName()));
           nvps.add(new BasicNameValuePair("implementors", getImplmentors(conf)));
-          nvps.add(new BasicNameValuePair("json", buildMassegeBody(conf.getAgentName(),conf.getInstPassword(), newCsr,conf.getAgentName()))); 
+          nvps.add(new BasicNameValuePair("instName" ,conf.getInstName()));
+          nvps.add(new BasicNameValuePair("instPassword" ,conf.getInstPassword()));
+          
           
 
         //add the content to the request 
@@ -120,23 +122,26 @@ public class Register{
 	  	try {
     		//get the path of the keystore 
 	  		String ksPath=conf.getKsPath();
+	  		String tsPath=conf.getTrustStorePath(); 
 	  		
     		//load the key store and the truststure 
             KeyStore trustStore  = KeyStore.getInstance(KeyStore.getDefaultType());
             KeyStore keyStore  = 	KeyStore.getInstance(KeyStore.getDefaultType());
-            FileInputStream instream = new FileInputStream(new File(ksPath));
-            FileInputStream instream2 = new FileInputStream(new File(ksPath));
+           
+            FileInputStream instreamKeyStore = new FileInputStream(new File(ksPath));
+            FileInputStream instreamTrustStore = new FileInputStream(new File(tsPath));
+            
             try {													  
                 try {
-					trustStore.load(instream, "a10097".toCharArray());
-					keyStore.load(instream2,"a10097".toCharArray()); 
+					trustStore.load(instreamTrustStore, "a10097".toCharArray());
+					keyStore.load(instreamKeyStore,"a10097".toCharArray()); 
 					} 
                 catch (Exception e){
 					throw new Exception("can't load the key store",e); 
 				}
             } finally {
-                try { instream.close();
-                	  instream2.close(); 
+                try { instreamKeyStore.close();
+                	  instreamTrustStore.close(); 
                 } 
                 catch (Exception ignore) {
                 	return null;  
@@ -222,7 +227,7 @@ public class Register{
 			propStr=next;
 			nextProp=propStr.indexOf("----")+"----".length();
 			//the last implemtor
-			if(nextProp<5){
+			if(nextProp>5){
 				stringBuilder.append(','); 
 			}
 		}					
@@ -250,13 +255,12 @@ public class Register{
 		in.close(); 
 		
 		//generate the seceret key 
-		SecretKeyFactory skf=SecretKeyFactory.getInstance("DES","BC"); 
-		SecretKeySpec keySpec=new SecretKeySpec(keyBytes,"DES"); 
-		SecretKey sk=skf.generateSecret(keySpec);
+		SecretKeySpec keySpec=new SecretKeySpec(keyBytes,"AES"); 
+		
 		
 		//generate the cipher 
-		 Cipher c = Cipher.getInstance("DES");
-		 c.init(Cipher.DECRYPT_MODE, sk);
+		 Cipher c = Cipher.getInstance("AES");
+		 c.init(Cipher.DECRYPT_MODE, keySpec);
 		 
 		 //read the bytes from the file 
 		 File file=new File(conf.getAgentSerivcePath()+conf.getSlesh()+"prop"); 

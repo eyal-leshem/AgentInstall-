@@ -112,13 +112,16 @@ public class MyKeyTool {
 		} catch (NoSuchAlgorithmException e) {
 			throw new MyKeyToolException("cann't ganerate private key",e);
 		} 
+		
 		SecretKey 	 key=keyGen.generateKey();
 		KeyStore 	 ks=loadKeyStore(); 
+		
 		try {
 			ks.setKeyEntry(alias, key.getEncoded(), null);
 		} catch (KeyStoreException e) {
 			throw new MyKeyToolException("cann't save the secret key in keystore, does the keystore support private keys?",e);
 		}
+		
 		storeKeyStore(ks); 
 							
 		return null;

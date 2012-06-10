@@ -70,30 +70,52 @@ import MykeyTool.*;
 		
 		  getConf(); 
 		
-		  String ksPath=conf.getKsPath(); 
+		  String ksPath=conf.getKsPath();
+		  String tsPath=conf.getTrustStorePath(); 
 		   
 		
-		  //make an empty keystore file 
-		  File keyStroeFile=new File("ksPath"); 
-		  if(keyStroeFile.exists()) 
-			  keyStroeFile.delete(); 
+		  //make an empty truststore  
+		  File trustStoreFile=new File(tsPath); 
+		  if(trustStoreFile.exists()) 
+			  trustStoreFile.delete(); 
 		  
-		  //genrate new key store 
-		  MyKeyTool kt=new MyKeyTool(new MyKeyToolConf(ksPath,"a10097")); 
-		  kt.createNewKs();
+		  //make an empty keystore
+		  File keyStoreFile=new File(ksPath); 
+		  if(keyStoreFile.exists()) 
+			  keyStoreFile.delete(); 
+		  
+		  //Generate empty-truststroe 
+		  MyKeyTool ktTrustStore=new MyKeyTool(new MyKeyToolConf(tsPath,"a10097")); 
+		  ktTrustStore.createNewKs();
+		  
+		  //Generate empty-keystore 
+		  MyKeyTool ktKeyStore=new MyKeyTool(new MyKeyToolConf(ksPath,"a10097")); 
+		  ktKeyStore.createNewKs();
+		  
+		  
 		
 		  //add the ca certificate to the new keystore  
 		  try{
 			  InputStream caCertStream=new FileInputStream(new File(conf.getServerCaPath()));	  
-			  kt.addTrustCert( caCertStream, "myCa");
+			  ktTrustStore.addTrustCert( caCertStream, "myCa");
+			  caCertStream.close(); 
+		  }catch (Exception e) {
+			throw new Exception("can't add the certificate of the ca of the server", e); 
+		  }
+		  
+		  //add the ca certificate to the new keystore  
+		  try{
+			  InputStream caCertStream=new FileInputStream(new File(conf.getServerCaPath()));	  
+			  ktKeyStore.addTrustCert( caCertStream, "myCa");
+			  caCertStream.close(); 
 		  }catch (Exception e) {
 			throw new Exception("can't add the certificate of the ca of the server", e); 
 		  }
 		  
 		  //Generate certificate request and write it to string 
 	      OutputStream out =new ByteArrayOutputStream(); 	  
-		  kt.genartePrivatekey("my key", "cn=a,ou=a,o=a,l=a,s=a,c=a");
-		  kt.genrateCsr("my key",out);
+		  ktKeyStore.genartePrivatekey("my key", "cn=a,ou=a,o=a,l=a,s=a,c=a");
+		  ktKeyStore.genrateCsr("my key",out);
 		  String csr=out.toString(); 
 	
 		  //register and get certificate sign by the Ca 
@@ -103,7 +125,7 @@ import MykeyTool.*;
 		  }
 
 		  //install the replay and chek the trust connection can establish 
-		  kt.installReply("my key", new ByteArrayInputStream(cert.getBytes()));
+		  ktKeyStore.installReply("my key", new ByteArrayInputStream(cert.getBytes()));
 		  TrustConnectionChek.connect(conf);
 		  
 	
