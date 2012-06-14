@@ -93,10 +93,25 @@ public class MyKeyTool {
 	
 	}
 	
-	public void createNewKs() throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException, MykeyToolIoException, MyKeyToolException {
-		  KeyStore ks = KeyStore.getInstance(conf.getKeyStoreType());
-		  ks.load(null, conf.getKsPassword().toCharArray());
-		  storeKeyStore(ks); 
+	public void createNewKs() throws MyKeyToolException, MykeyToolIoException {
+		//get instance of keystore object
+		KeyStore ks;
+		try {
+			ks = KeyStore.getInstance(conf.getKeyStoreType());
+		} catch (KeyStoreException e) {
+			throw new MyKeyToolException("can't create keystore of type"+ conf.getKeyStoreType(), e);
+		}
+		
+		//load new  key store 
+		try {
+			ks.load(null, conf.getKsPassword().toCharArray());
+		} catch (Exception e){
+			throw new MyKeyToolException("can't create new keystore", e); 
+		}
+		
+		//store the new keystore to file 		
+		storeKeyStore(ks);
+		 
 		  
 	 }
 	/**

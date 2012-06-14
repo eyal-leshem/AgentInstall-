@@ -66,8 +66,13 @@ import MykeyTool.*;
 		
 		
 	
-	public static void main(String[] argv) throws Exception{
+	public static void main(String[] argv)  {
 		
+		MyKeyTool ktTrustStore=null;
+		MyKeyTool ktKeyStore=null;
+		String cert = null;
+		
+		try{
 		  getConf(); 
 		
 		  String ksPath=conf.getKsPath();
@@ -85,48 +90,87 @@ import MykeyTool.*;
 			  keyStoreFile.delete(); 
 		  
 		  //Generate empty-truststroe 
-		  MyKeyTool ktTrustStore=new MyKeyTool(new MyKeyToolConf(tsPath,"a10097")); 
-		  ktTrustStore.createNewKs();
+		  ktTrustStore=new MyKeyTool(new MyKeyToolConf(tsPath,"a10097")); 
+		  try {
+			ktTrustStore.createNewKs();
+		  } catch (MyKeyToolBaseExctpion e){
+			throw new AgentInstallException("can't create new keystore at path: "+ tsPath); 
+		  }
 		  
 		  //Generate empty-keystore 
-		  MyKeyTool ktKeyStore=new MyKeyTool(new MyKeyToolConf(ksPath,"a10097")); 
-		  ktKeyStore.createNewKs();
-		  
+		  ktKeyStore=new MyKeyTool(new MyKeyToolConf(ksPath,"a10097")); 
+		  try {
+			  ktKeyStore.createNewKs();
+		  } catch (MyKeyToolBaseExctpion e){
+			throw new AgentInstallException("can't create new keystore at path: "+ ksPath);
+		  }
 		  
 		
 		  //add the ca certificate to the new keystore  
+		  InputStream caCertStream;
 		  try{
-			  InputStream caCertStream=new FileInputStream(new File(conf.getServerCaPath()));	  
-			  ktTrustStore.addTrustCert( caCertStream, "myCa");
-			  caCertStream.close(); 
-		  }catch (Exception e) {
-			throw new Exception("can't add the certificate of the ca of the server", e); 
+			
+			caCertStream=new FileInputStream(new File(conf.getServerCaPath()));	  
+			ktTrustStore.addTrustCert( caCertStream, "myCa");
+			caCertStream.close();
+			
 		  }
-		  
-		  //add the ca certificate to the new keystore  
+		  catch (Exception e) {
+			throw new AgentInstallException("can't add the ca certificate to truststore", e);
+		  }
+		 
 		  try{
-			  InputStream caCertStream=new FileInputStream(new File(conf.getServerCaPath()));	  
-			  ktKeyStore.addTrustCert( caCertStream, "myCa");
-			  caCertStream.close(); 
-		  }catch (Exception e) {
-			throw new Exception("can't add the certificate of the ca of the server", e); 
+			//add the ca certificate to the new keystore  
+			caCertStream=new FileInputStream(new File(conf.getServerCaPath()));	  
+			ktKeyStore.addTrustCert( caCertStream, "myCa");
+			caCertStream.close();
 		  }
+		  catch (Exception e) {
+			  throw new AgentInstallException("can't add the ca certificate to keystorw", e);
+		  }
+		 
 		  
 		  //Generate certificate request and write it to string 
-	      OutputStream out =new ByteArrayOutputStream(); 	  
-		  ktKeyStore.genartePrivatekey("my key", "cn=a,ou=a,o=a,l=a,s=a,c=a");
-		  ktKeyStore.genrateCsr("my key",out);
+		  OutputStream out =new ByteArrayOutputStream(); 	
+		  try{
+			  ktKeyStore.genartePrivatekey("my key", "cn=a,ou=a,o=a,l=a,s=a,c=a");
+		  }
+		  catch (MyKeyToolBaseExctpion e) {
+			throw new AgentInstallException("prolebm to genarte a privte key with name: my key and dname: cn=a,ou=a,o=a,l=a,s=a,c=a ",e ); 
+		  }
+	    
+		  try{
+	    	ktKeyStore.genrateCsr("my key",out);
+		  }
+		  catch (MyKeyToolBaseExctpion e) {
+			throw new AgentInstallException("can't genrate csr from the key: my key", e); 
+		  }
+	    
+		  //make string from the csr 
 		  String csr=out.toString(); 
 	
 		  //register and get certificate sign by the Ca 
-		  String cert=Register.register(csr,conf); 
-		  if(cert==null){
-			  return; 
-		  }
+		  cert=Register.register(csr,conf);
+		 
+		}
+		catch (AgentInstallException e) {
+			installFail(e); 
+		}
+		
 
-		  //install the replay and chek the trust connection can establish 
-		  ktKeyStore.installReply("my key", new ByteArrayInputStream(cert.getBytes()));
-		  TrustConnectionChek.connect(conf);
+		//install the replay and chek the trust connection can establish 
+		try {
+			ktKeyStore.installReply("my key", new ByteArrayInputStream(cert.getBytes()));
+		} catch (MyKeyToolBaseExctpion e){
+			failToImportTheAnswer(e); 
+		}
+		
+		try{
+			TrustConnectionChek.connect(conf);
+		}
+		catch (TrustConnectionCheckException e) {
+			failToCreateTrustConnection(e); 
+		}
 		  
 	
 		  
@@ -136,28 +180,69 @@ import MykeyTool.*;
 		
 	}
 	
-	private static void getConf() throws Exception{
+	private static void failToCreateTrustConnection(
+			TrustConnectionCheckException e) {
+		System.out.println("After successful registration process");
+		System.out.println("can't create trust connection with server");
+		System.out.println("the problem is: "+ e.getMessage());
+		System.out.println("full exception is: "); 
+		e.printStackTrace(); 
+		System.exit(0);
+		
+	}
+
+	private static void failToImportTheAnswer(MyKeyToolBaseExctpion e) {
+		System.out.println("After successful registration process");
+		System.out.println("can't install the server certifcate in the agent");
+		System.out.println("the problem is: "+ e.getMessage());
+		System.out.println("full exception is: "); 
+		e.printStackTrace(); 
+		System.exit(0); 
+		
+	}
+
+	private static void installFail(AgentInstallException e) {
+		System.out.println("can't install the agnet");
+		System.out.println("the problem is: "+ e.getMessage());
+		System.out.println("------------------------------");
+		System.out.println("full exception is: "); 
+		e.printStackTrace();
+		System.exit(0);
+		
+		
+	}
+
+	private static void getConf() throws AgentInstallException{
 		try{
 			getConf("conf.cnf"); 
 		}
-		catch (FileNotFoundException e) {
-			throw new Exception("conf file conf.cnf don't exsit"); 
+		catch (AgentInstallException e) {
+			throw new AgentInstallException("can't genarte configutationn from file conf.cnf"); 
 		}
 		
 		
 		
 	}
-	private static void getConf(String path) throws IOException{
+	private static void getConf(String path) throws AgentInstallException{
+		
+		String jsonConfStr;
 		
 		//read the json string that contain the properties from the file 
 		File confFile=new File(path); 
-		FileReader fr=new FileReader(confFile);
-		char[] buffer=new  char[(int)confFile.length()];
-		fr.read(buffer);
-		String jsonConfStr=new String(buffer); 
+		try{
+			FileReader fr=new FileReader(confFile);
+			char[] buffer=new  char[(int)confFile.length()];
+			fr.read(buffer);
+			jsonConfStr=new String(buffer); 
+		}
+		
+		catch (IOException e) {
+			throw new AgentInstallException("can't read fron cof file in Path "+ path, e); 
+		}
 		
 		//and use the json conf contractor 
-	   conf= new InstallConf(jsonConfStr);  
+	   	conf= new InstallConf(jsonConfStr);
+
 	   
 	   
 		

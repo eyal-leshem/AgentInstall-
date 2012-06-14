@@ -42,8 +42,9 @@ public class InstallConf {
 	 * @param jsonStr
 	 * @throws IOException
 	 */
-	public InstallConf(String jsonStr) throws IOException{
+	public InstallConf(String jsonStr) throws AgentInstallException{
 		try {
+			
 			JSONObject json=new JSONObject(jsonStr);			 			
 			this.setAgentName(json.getString("agentName"));
 			this.setAgentSerivcePath(json.getString("agentServicePath")); 
@@ -56,9 +57,8 @@ public class InstallConf {
 			
 			
 			
-			
 		} catch (JSONException e) {
-			throw new IOException("cann't genrate legal json from the args ", e);
+			throw new AgentInstallException("cann't get the paramter from json : " + jsonStr, e);
 		} 
 		
 	}
