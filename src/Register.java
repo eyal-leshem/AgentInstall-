@@ -282,7 +282,7 @@ public class Register{
 	
 		//get all the properties to string that build like that 
 		//prop1,prop2,prop3 .. 
-		while(nextProp>4){
+		while(nextProp>=4){
 			String next=propStr.substring(nextProp);
 			String toAdd=next.substring(0,next.indexOf("\n")); 
 			stringBuilder.append(toAdd);
