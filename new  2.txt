@@ -1,0 +1,6 @@
+{	 
+	 "agentName":"eyal" ,  	
+	 "urlSendAck":"https://localhost/MA/getAck.php" ,
+	 "urlGetTask":"https://localhost/MA/getTasks.php" ,  
+	 "sleepTime":3 
+}

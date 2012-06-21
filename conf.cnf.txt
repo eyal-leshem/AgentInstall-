@@ -1,0 +1,5 @@
+{
+	"agentName":"eyal", 
+	"agentServicePath":"c:/temp/agentService" , 
+	"serverCaPath":"C:/temp/csr/cafesoftCa.crt"
+}

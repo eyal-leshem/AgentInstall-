@@ -1,10 +1,9 @@
 {
-	"agentName":"eyal", 
 	"agentServicePath":"c:/temp/agentService" , 
 	"serverCaPath":"C:/temp/csr/cafesoftCa.crt",
 	"instName":"eyal",
 	"instPassword":"a10097",
-	"serverRegAgentPath":"https://localhost/MA/a.php",
-	"serverChekTrustConectionPath":"https://localhost/OK/a.php"
+	"serverRegAgentPath":"https://localhost/regAgent",
+	"serverChekTrustConectionPath":"https://localhost/chekTrust"
 	
 }

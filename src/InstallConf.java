@@ -13,6 +13,69 @@ public class InstallConf {
 	private String  		instName; 
 	private String  		instPassword; 
 	private String			serverRegAgentPath; 
+	private String			serverChekTrustConectionPath; 
+	
+	/**
+	 * genrate all parms from json string
+	 * @param jsonStr
+	 * @throws IOException
+	 */
+	public InstallConf(String jsonStr) throws AgentInstallException{
+		
+		//install all varible to b null 
+		agentName=null; 
+		instName=null; 
+		instPassword=null; 
+		serverRegAgentPath=null; 
+		instName=null; 
+		instPassword=null; 
+		serverRegAgentPath=null;
+			
+		JSONObject json;
+		try {
+			json = new JSONObject(jsonStr);
+		} catch (JSONException e) {
+			throw new AgentInstallException("can't genrate json from the string", e); 
+		}
+		/*
+		 * if there is no such parmeter in the json 
+		 * the json object will throw exception but it is not problem 
+		 * Because the holes will b fix later  	
+		 */
+		try {
+			this.setAgentName(json.getString("agentName"));
+		} catch (JSONException e) {}
+	
+		try {
+			this.setAgentSerivcePath(json.getString("agentServicePath"));
+		} catch (JSONException e) {}
+		
+		try {
+			this.setServerCaPath(json.getString("serverCaPath"));
+		} catch (JSONException e) {}
+		
+		try {
+			this.setInstName(json.getString("instName"));
+		} catch (JSONException e) {} 
+		
+		try {
+			this.setInstPassword(json.getString("instPassword"));
+		} catch (JSONException e) {}
+		
+		try	{
+		this.setServerRegAgentPath(json.getString("serverRegAgentPath"));
+		}
+		catch (JSONException e) {}
+		
+		try	{
+		this.setServerChekTrustConectionPath(json.getString("serverChekTrustConectionPath"));
+		}catch (JSONException e) {}	
+			
+			
+			
+		
+		
+	}
 	
 	
 	public String getTrustStorePath() {
@@ -36,33 +99,6 @@ public class InstallConf {
 		this.serverChekTrustConectionPath = serverChekTrustConectionPath;
 	}
 
-	private String			serverChekTrustConectionPath; 
-	/**
-	 * genrate all parms from json string
-	 * @param jsonStr
-	 * @throws IOException
-	 */
-	public InstallConf(String jsonStr) throws AgentInstallException{
-		try {
-			
-			JSONObject json=new JSONObject(jsonStr);			 			
-			this.setAgentName(json.getString("agentName"));
-			this.setAgentSerivcePath(json.getString("agentServicePath")); 
-			this.setServerCaPath(json.getString("serverCaPath")); 
-			this.setInstName(json.getString("instName")); 
-			this.setInstPassword(json.getString("instPassword")); 
-			this.setServerRegAgentPath(json.getString("serverRegAgentPath"));
-			this.setServerChekTrustConectionPath(json.getString("serverChekTrustConectionPath"));
-			
-			
-			
-			
-		} catch (JSONException e) {
-			throw new AgentInstallException("cann't get the paramter from json : " + jsonStr, e);
-		} 
-		
-	}
-	
 	public String getInstName() {
 		return instName;
 	}

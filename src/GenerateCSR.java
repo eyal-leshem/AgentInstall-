@@ -72,9 +72,15 @@ import MykeyTool.*;
 		MyKeyTool ktKeyStore=null;
 		String cert = null;
 		
-		try{
-		  getConf(); 
 		
+		try{
+			getConf(); 
+			
+			conf=ArgsConf.setConf(argv,conf); 
+			
+			
+			
+			
 		  String ksPath=conf.getKsPath();
 		  String tsPath=conf.getTrustStorePath(); 
 		   
