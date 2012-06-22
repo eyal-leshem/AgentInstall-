@@ -1,7 +1,6 @@
 {
 	"agentServicePath":"c:/temp/agentService" , 
 	"serverCaPath":"C:/temp/csr/cafesoftCa.crt",
-	"instName":"eyal",
 	"instPassword":"a10097",
 	"serverRegAgentPath":"https://localhost/regAgent",
 	"serverChekTrustConectionPath":"https://localhost/chekTrust"

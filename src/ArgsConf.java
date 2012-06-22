@@ -1,5 +1,13 @@
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Scanner;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 
 public class ArgsConf {
@@ -29,7 +37,7 @@ public class ArgsConf {
 			
 			//get the rest of the parmters fron the user
 			askUserParmeter(conf); 
-			
+			changeNameInAgentServiceConf(conf); 
 		 
 			
 			return conf; 
@@ -38,6 +46,67 @@ public class ArgsConf {
 		}catch (AgentInstallException e) {
 			throw new AgentInstallException("problem to load the parmeters", e); 
 		}					
+		
+	}
+
+
+	private static void changeNameInAgentServiceConf(InstallConf conf) throws AgentInstallException {
+	
+		//check that directory is ok 
+		File file=new File(conf.getAgentSerivcePath()); 	
+		if(!file.isDirectory()){
+			throw new AgentInstallException("problem vith the path of agent service - "+conf.getAgentSerivcePath()); 
+		}
+	
+		File confFile=new File(conf.getAgentSerivcePath()+conf.getSlesh()+"conf.cnf"); 
+		
+		FileReader fr;
+		try {
+			fr=new FileReader(confFile);
+		} catch (FileNotFoundException e) {
+			throw new AgentInstallException("conf file conf.cnf must to be in the agent service dirctory", e); 
+		} 
+		
+		char[] jsonConfData=new char[(int)(confFile.length())]; 
+		try {
+			fr.read(jsonConfData);
+			fr.close();
+		} catch (IOException e) {
+			throw new AgentInstallException("can't read from agent service configuration file", e); 
+		} 
+		
+		
+		
+		String jsonConfStr=new String(jsonConfData); 
+		
+		JSONObject jsonConfObj; 
+		try {
+			 jsonConfObj=new JSONObject(jsonConfStr);
+		} catch (JSONException e) {
+			throw new AgentInstallException("cann't genarate legal json from agent service configuration file", e); 
+		} 
+		
+		try {
+			jsonConfObj.put("agentName", conf.getAgentName());
+		} catch (JSONException e) {
+			throw new AgentInstallException("can't add the agentname to json object");
+		} 
+		
+		try{
+			FileWriter fw=new FileWriter(confFile); 
+			fw.write(jsonConfObj.toString()); 
+			fw.flush(); 
+			fr.close();
+		} catch(IOException e){
+			throw new AgentInstallException("can't write the json data to object ");
+		}
+			
+		
+		
+		
+		
+		
+		
 		
 	}
 
