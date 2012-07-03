@@ -93,7 +93,7 @@ public class Register{
           nvps.add(new BasicNameValuePair("implementors", getImplmentors(conf)));
           nvps.add(new BasicNameValuePair("instName" ,conf.getInstName()));
           nvps.add(new BasicNameValuePair("instPassword" ,conf.getInstPassword()));
-          
+          nvps.add(new BasicNameValuePair("jsonConf" ,getAgentConf(conf)));
           
 
         //add the content to the request 
@@ -127,6 +127,35 @@ public class Register{
 
 	}
 	
+	private static String getAgentConf(InstallConf conf) throws AgentInstallException {
+		//check that directory is ok 
+		File file=new File(conf.getAgentSerivcePath()); 	
+		if(!file.isDirectory()){
+			throw new AgentInstallException("problem vith the path of agent service - "+conf.getAgentSerivcePath()); 
+		}
+	
+		File confFile=new File(conf.getAgentSerivcePath()+conf.getSlesh()+"conf.cnf"); 
+		
+		FileReader fr;
+		try {
+			fr=new FileReader(confFile);
+		} catch (FileNotFoundException e) {
+			throw new AgentInstallException("conf file conf.cnf must to be in the agent service dirctory", e); 
+		} 
+		
+		char[] jsonConfData=new char[(int)(confFile.length())]; 
+		try {
+			fr.read(jsonConfData);
+			fr.close();
+		} catch (IOException e) {
+			throw new AgentInstallException("can't read from agent service configuration file", e); 
+		} 
+		
+		
+		
+		return  new String(jsonConfData); 
+	}
+
 	/**
 	 *  get the scheme for creating the ssl connection 
 	 * @param conf

@@ -42,7 +42,7 @@ import org.bouncycastle.asn1.DERSet;
 import org.bouncycastle.jce.*;
 import org.bouncycastle.asn1.x509.*;
 import org.bouncycastle.asn1.pkcs.*;
-import org.bouncycastle.openssl.*;
+//import org.bouncycastle.openssl.*;
 import org.json.JSONException;
 import org.json.JSONObject;
 
