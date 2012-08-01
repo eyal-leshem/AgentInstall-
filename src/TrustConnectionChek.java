@@ -1,6 +1,7 @@
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.security.KeyManagementException;
 import java.security.KeyStore;
 import java.security.KeyStore.Entry;
@@ -21,6 +22,7 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpParams;
 import org.apache.http.util.EntityUtils;
+import org.xml.sax.InputSource;
 
 import com.sun.xml.internal.messaging.saaj.util.ByteOutputStream;
 
@@ -47,8 +49,8 @@ public class TrustConnectionChek {
             
             try {													  
                 try {
-					trustStore.load(instreamTrustStore, "a10097".toCharArray());
-					keyStore.load(instreamKeyStore,"a10097".toCharArray()); 
+						trustStore.load(instreamTrustStore, "a10097".toCharArray());
+						keyStore.load(instreamKeyStore,"a10097".toCharArray()); 
 					} 
                 catch (Exception e){
 					throw new TrustConnectionCheckException("can't load the key store for creating trust connction",e); 
@@ -56,8 +58,9 @@ public class TrustConnectionChek {
             }
             
             finally {
-                try { instreamKeyStore.close();
-                	  instreamTrustStore.close(); 
+                try { 
+                	instreamKeyStore.close();
+                	 instreamTrustStore.close(); 
                 } 
                 catch (Exception ignore) {}
             }
@@ -73,7 +76,7 @@ public class TrustConnectionChek {
             httpclient.getConnectionManager().getSchemeRegistry().register(sch);
 
             //Execute the method 
-            HttpGet httpget = new HttpGet(conf.getServerChekTrustConectionPath());         										
+            HttpGet httpget = new HttpGet(conf.getServerChekTrustConectionPath()+"?name="+conf.getAgentName());         										
             HttpResponse response;
 			try {
 				response = httpclient.execute(httpget);
@@ -81,10 +84,16 @@ public class TrustConnectionChek {
 				throw new TrustConnectionCheckException("can't excute the http method of check"); 
 			}
             HttpEntity entity = response.getEntity();
+            
+            InputStream in=entity.getContent(); 
+            byte[] arr=new byte[(int)entity.getContentLength()]; 
+            in.read(arr); 
+            String ans=new String(arr); 
 
+            System.out.println(ans);
             //check success 
             System.out.println("----------------------------------------");
-            if(entity.getContentLength()==5){
+            if(ans.indexOf("walla")>=0){
             	System.out.println("install complet in sucsses"); 
             }
             else {

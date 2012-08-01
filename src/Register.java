@@ -285,45 +285,28 @@ public class Register{
 	 * @return the string of the implementors (imp1,imp2 ... )  
 	 */
 	private static String getImplmentors(InstallConf conf)  {
-		String propStr;
-		try {
-			//load the properties string from the encrypted file 
-			propStr=getPropStr(conf);
-		} 
-		catch (AgentInstallException e){
-			System.out.println("can't load the propethis file");
-			
-			//print all exception messages in the tree 
-			Throwable e1=e; 
-			while(e1!=null){
-				System.out.println(e.getMessage());
-				e1=e1.getCause(); 
+
+		String pluginDirStr=conf.getAgentSerivcePath()+conf.getSlesh()+"plugins"; 
+		File   pluginDir=new File(pluginDirStr); 
+		
+		StringBuilder sb=new StringBuilder();
+		
+		String[] plugInfiles=pluginDir.list();
+		
+		for(int i=0; i<plugInfiles.length;i++){
+			String str=plugInfiles[i]; 
+			if(str.endsWith(".jar")){
+				str=str.substring(0, str.indexOf(".jar")); 
+				sb.append(str+","); 
 			}
-				
-			System.out.println("return an emprty implemnor string");
+		}
+		
+		if(sb.length()==0){
 			return ""; 
-		}//end of catch 
+		}
 		
-		//the next instance of properties block start with ----
-		//(Properties block structure ("----Implementor name \n jsonPropertiesString") )
-		int nextProp=propStr.indexOf("----")+"----".length(); 
-		StringBuilder stringBuilder=new StringBuilder(); 
-	
-		//get all the properties to string that build like that 
-		//prop1,prop2,prop3 .. 
-		while(nextProp>=4){
-			String next=propStr.substring(nextProp);
-			String toAdd=next.substring(0,next.indexOf("\n")); 
-			stringBuilder.append(toAdd);
-			propStr=next;
-			nextProp=propStr.indexOf("----")+"----".length();
-			//the last implemtor
-			if(nextProp>5){
-				stringBuilder.append(','); 
-			}
-		}					
+		return sb.toString().substring(0,sb.length()-1); 
 		
-		return stringBuilder.toString(); 
 	}
 	
 	/**
